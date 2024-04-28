@@ -41,7 +41,7 @@ class Soldier(pygame.sprite.Sprite):
             temp_list.append(img)
         self.animation_list.append(temp_list)
         temp_list = []
-        for i in range(2):
+        for i in range(5):
             img = pygame.image.load(f"img/{pers_type}/run/{i}.png")
             self.image = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
             temp_list.append(img)
