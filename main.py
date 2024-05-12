@@ -24,6 +24,7 @@ shoot = False
 
 
 bullet_img = pygame.image.load('img/icons/bullet.png').convert_alpha()
+bg = pygame.image.load('img/backgraund/0.png').convert_alpha()
 
 
 
@@ -33,6 +34,7 @@ red_line = (255, 0, 0)
 def draw_back_graund():
 	screen.fill(back_gr)
 	pygame.draw.line(screen, red_line, (0, 690), (SCREEN_WIDTH, 690))
+	screen.blit(bg, (0, 0))
 
 
 
