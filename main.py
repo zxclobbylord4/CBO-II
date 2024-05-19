@@ -1,5 +1,6 @@
 import pygame
 import os
+import random
 
 pygame.init()
 
@@ -58,7 +59,13 @@ class Soldier(pygame.sprite.Sprite):
 		self.frame_index = 0
 		self.action = 0
 		self.update_time = pygame.time.get_ticks()
-		
+
+		#переменные для ии
+		self.move_counter = 0
+		self.vision = pygame.Rect(0, 0, 150, 20)
+		self.idling = False
+		self.idling_counter = 0
+
 		#загрузка всех изображений для персонажей
 		animation_types = ['Idle', 'run', 'jump', 'death']
 		for animation in animation_types:
@@ -125,9 +132,41 @@ class Soldier(pygame.sprite.Sprite):
 	def shoot(self):
 		if self.shoot_cooldown == 0 and self.ammo > 0:
 			self.shoot_cooldown = 20
-			bullet = Bullet(self.rect.centerx + (0.6 * self.rect.size[0] * self.direction), self.rect.centery, self.direction)
+			bullet = Bullet(self.rect.centerx + (0.75 * self.rect.size[0] * self.direction), self.rect.centery - 10, self.direction)
 			bullet_group.add(bullet)
 			self.ammo -= 1
+
+	
+	def ai(self):
+		if self.alive and player.alive:
+			if self.idling == False and random.randint(1, 200) == 1:
+				self.update_action(0)   #стойка
+				self.idling = True
+				self.idling_counter = 50
+			#если игрок находится в поле зрения врага
+			if self.vision.colliderect(player.rect):
+				self.update_action(0)  #стойка
+				self.shoot()
+			else:
+				if self.idling == False:
+					if self.direction == 1:
+						ai_moving_right = True
+					else:
+						ai_moving_right = False
+					ai_moving_left = not ai_moving_right
+					self.move(ai_moving_left, ai_moving_right)
+					self.update_action(1)  #бег
+					self.move_counter += 1
+					#обновление зрения ии во время бега
+					self.vision.center = (self.rect.centerx + 75 * self.direction, self.rect.centery)
+
+					if self.move_counter > TILE_SIZE:
+						self.direction *= -1
+						self.move_counter *= -1
+				else:
+					self.idling_counter -= 1
+					if self.idling_counter <= 0:
+						self.idling = False
 
 
 	def update_animation(self):
@@ -170,14 +209,6 @@ class Soldier(pygame.sprite.Sprite):
 		screen.blit(pygame.transform.flip(self.image, self.flip, False), self.rect)
 
 
-class Bullet(pygame.sprite.Sprite):
-	def __init__(self, item_type, x, y):
-		pygame.sprite.Sprite.__init__(self)
-		self.item_type = item_type
-		self.image = item_boxes[self.item_type]
-		self.rect = self.image.get_rect()
-		self.rect.midtop = (x + TILE_SIZE)
-
 
 class Bullet(pygame.sprite.Sprite):
 	def __init__(self, x, y, direction):
@@ -206,15 +237,14 @@ class Bullet(pygame.sprite.Sprite):
 
 
 
-
-bullet_group = pygame.sprite.Group()
 enemy_group = pygame.sprite.Group()
+bullet_group = pygame.sprite.Group()
 
 
 
 player = Soldier('player', 200, 720, 1.5, 5, 30)
-enemy = Soldier('enemy', 400, 640, 1.5, 5, 30)
-enemy2 = Soldier('enemy', 600, 640, 1.5, 5, 30)
+enemy = Soldier('enemy', 400, 680, 1.5, 5, 30)
+enemy2 = Soldier('enemy', 600, 680, 1.5, 5, 30)
 enemy_group.add(enemy)
 enemy_group.add(enemy2)
 
@@ -230,6 +260,7 @@ while run:
 	player.draw()
 
 	for enemy in enemy_group:
+		enemy.ai()
 		enemy.update()
 		enemy.draw()
 
