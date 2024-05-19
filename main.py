@@ -37,6 +37,16 @@ def draw_back_graund():
 	pygame.draw.line(screen, red_line, (0, 690), (SCREEN_WIDTH, 690))
 	screen.blit(bg, (0, 0))
 
+def bg_music():
+  pygame.mixer.music.load('sound/Muz.mp3')
+  pygame.mixer.music.play(-1)
+  pygame.mixer.music.set_volume(0.2)
+  
+def sound_shoot():
+  sound_shoot = pygame.mixer.Sound('sound/shoot.mp3')
+  sound_shoot.set_volume(0.2)
+  sound_shoot.play()
+
 
 
 class Soldier(pygame.sprite.Sprite):
@@ -147,6 +157,7 @@ class Soldier(pygame.sprite.Sprite):
 			if self.vision.colliderect(player.rect):
 				self.update_action(0)  #стойка
 				self.shoot()
+				sound_shoot()
 			else:
 				if self.idling == False:
 					if self.direction == 1:
@@ -250,6 +261,7 @@ enemy_group.add(enemy2)
 
 
 run = True
+bg_music()
 while run:
 
 	clock.tick(FPS)
@@ -291,6 +303,7 @@ while run:
 				moving_right = True
 			if event.key == pygame.K_SPACE:
 				shoot = True
+				sound_shoot()
 			if event.key == pygame.K_w and player.alive:
 				player.jump = True
 			if event.key == pygame.K_ESCAPE:
